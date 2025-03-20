@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -30,20 +29,24 @@ import software.xdev.testcontainers.selenium.containers.browser.CapabilitiesBrow
 public class GoogleTitleTestcontainerTestWithVideo {
 
     private static final Logger logger = LoggerFactory.getLogger(GoogleTitleTestcontainerTestWithVideo.class);
-
     private static WebDriver driver;
-    private static Path recordingDir = Path.of("target/records");
-    private static Capabilities capabilities = new ChromeOptions();
+    private static final Path recordingDir = Path.of("target/records");
+    private static final Capabilities capabilities = new ChromeOptions();
+
     @Container
-    private static CapabilitiesBrowserWebDriverContainer<?> browserContainer =browserContainer = new CapabilitiesBrowserWebDriverContainer<>(capabilities)
-            .withRecordingMode(BrowserWebDriverContainer.RecordingMode.RECORD_ALL)
-            .withRecordingDirectory(recordingDir);
+    private static final CapabilitiesBrowserWebDriverContainer<?> browserContainer =
+            new CapabilitiesBrowserWebDriverContainer<>(capabilities)
+                    .withRecordingMode(BrowserWebDriverContainer.RecordingMode.RECORD_ALL)
+                    .withRecordingDirectory(recordingDir);
 
     @BeforeAll
-    static void setup() throws MalformedURLException {
+    static void setup() throws IOException {
         driver = new RemoteWebDriver(browserContainer.getSeleniumAddressURI().toURL(), capabilities, false);
         driver.manage().window().maximize();
         logger.info("Selenium container started successfully for {}", capabilities.getBrowserName());
+
+        // Ensure the recording directory exists
+        recordingDir.toFile().mkdirs();
     }
 
     @Test
@@ -68,15 +71,15 @@ public class GoogleTitleTestcontainerTestWithVideo {
             driver.quit();
             logger.info("WebDriver closed.");
         }
-        
+
+        // Log video file location if available
         Optional<File> videoFile = findLatestVideoFile(recordingDir);
         videoFile.ifPresentOrElse(
-            file -> {
-                logger.info("Video saved at: {}", file.getAbsolutePath());
-                System.out.println("Video saved at: " + file.getAbsolutePath());
-            },
-            () -> logger.warn("No video file found in directory: {}", recordingDir.toAbsolutePath())
+                file -> {
+                    logger.info("Video saved at: {}", file.getAbsolutePath());
+                    System.out.println("Video saved at: " + file.getAbsolutePath());
+                },
+                () -> logger.warn("No video file found in directory: {}", recordingDir.toAbsolutePath())
         );
     }
-
 }

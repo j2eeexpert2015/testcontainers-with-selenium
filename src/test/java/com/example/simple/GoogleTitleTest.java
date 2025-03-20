@@ -55,33 +55,4 @@ public class GoogleTitleTest {
         }
     }
 
-    private String takeScreenshot() throws IOException {
-        // Get the class and method name dynamically
-        String className = this.getClass().getSimpleName();
-        String methodName = Thread.currentThread().getStackTrace()[2].getMethodName();
-        String fileName = className + "_" + methodName + ".png"; // Format: Class_Method.png
-
-        // Define target directory for screenshots inside 'target/'
-        String screenshotDir = System.getProperty("user.dir") + "/target/screenshots/";
-        File destFile = new File(screenshotDir + fileName);
-
-        // Ensure directory exists
-        Files.createDirectories(destFile.getParentFile().toPath());
-
-        // Delete existing file if it exists
-        if (destFile.exists()) {
-            Files.delete(destFile.toPath());
-        }
-
-        // Take and save screenshot
-        File srcFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        Files.copy(srcFile.toPath(), destFile.toPath());
-
-        logger.info("Screenshot saved at: {}", destFile.getAbsolutePath());
-        System.out.println("Screenshot saved at: " + destFile.getAbsolutePath());
-
-        return destFile.getAbsolutePath(); // Return absolute path
-    }
-
-
 }
